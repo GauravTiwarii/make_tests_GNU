@@ -1,0 +1,4 @@
+my_var = hellow theere
+
+printMe : 
+	echo $(my_var)

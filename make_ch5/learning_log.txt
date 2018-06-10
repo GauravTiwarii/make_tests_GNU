@@ -1,0 +1,14 @@
+1. one shell for each rule!
+2. all rule's shell are independent and have no reference to each other.
+3. we can configure this setting using implicit rules.
+4. a Makefile that contains "SHELL = /bin/sh" (as many unix makefiles do), will work on MS-DOS unaltered, if you havesh.exe installed in some directory along your PATH.
+5. -j , --jobs defines number of recipes allowed to run simultaneiously.
+6. use .NOTPARALLEL pseudo-target, to inhibit parallel exec feature for any makefile
+7. use -l, --max-load to defiine load average threshold to initate a job/parallel execution.
+8. use --output-sync = [none, line, target, recurse] to synchronise the output as per requirement. But this leads to non-interactive mode of writing logs.
+9. avoid standard input in parallel executions. Only one gets the standard input, others get ERROR: BROKEN_PIPE
+10. if not running parallel execution, standard input works as intended.
+11. make will delete the target file, if .DELETE_ON_ERROR as a target.
+12. interrupting or killing make in between process, leads to deletion of target files.
+13. use .PRECIOUS to prevent deletion of target files, in case of failures.
+14.  
