@@ -11,4 +11,68 @@
 11. make will delete the target file, if .DELETE_ON_ERROR as a target.
 12. interrupting or killing make in between process, leads to deletion of target files.
 13. use .PRECIOUS to prevent deletion of target files, in case of failures.
-14.  
+14.  recursive expansion is used by variable with "=" assignment.
+15. simple expansion is used by variable with ":=" assignment.
+16. from any assignment only prefixed spaces are removed, trailing spaces will still be there.
+17: "?=" is conditional variable assignment operator, because it only has an effect if the variable is not yet defined
+FOO ?= bar |==| ifeq($(origin FOO), undefined)
+	FOO = bar
+endif
+18. $(var:a=b) works same as $(patsubst a,b,$(var))
+19. "!=" can be used to execute a shell script and set a variable to its output. This operator first evaluates the right hand side, then passes the result to shell for execution. The resulting string is then placed in the named recursively-expanded variable.
+	hash != printf '\o43'
+	file_list != find . -name '*.c'
+
+19.You can set a simply expanded variable to the result of running a program using the shell function call.
+	hash := $(shell printf '\043')
+	var := $(shell find . -name "*,c")
+20. The exit status of just-invoked shell script is stored in the .SHELLSTATUS variable.
+21. Using "+=" is similar to 
+	objects = main.o foo.o bar.o utils.o
+	objects := $(objects) another.o
+
+	if the initial assignment of objects is "simple expansion". i.e. objects := something.
+
+22. Using "+=" on recursive expansion ensures that the underlying $(something) variables will be resolved and updated in concatenation. i.e. object = $(include) -O
+	object += -pg [ensures $(include) resolution whenever $(include) is resolved]
+
+23. use override variable = value / override variable := value to update variables provided via command line. Furthermore, you can  use "+=" to add on to command line arguments
+24. override a variable using define : override define = 
+	echo foo
+	echo bar
+endef
+25. Avoid using Environment variables in makefiles, as it would cause different users to get different results from the same makefile.
+26. SHELL env variable is specially managed by make.
+27. Using target-specific variables: when you define a target specific variable that variable value is alsos effect for all prerequisite unless they override it.
+ prog : CFLAGS = -g #target variable
+ prog : prog.o foo.o bar.o
+28. Be aware that a given prerequisite will only be build once per invocation of make, at most. If the same file is a prerequisite of multiple targets, and each of those targets has a different value for the same target-specific variable, then the first target to cause that prerequisite to be built and the prerequisite will inherit the target-specific from the first target. It will ignore the target-specific values from any other target.
+29. patter-specific variables are those that create variables for matching targets:
+	%.o : CFLAGS = -O
+	%o: %.c 
+		$(CC) -c $(CFLAGS) $(CPPFLAGS) $< -o $@
+
+
+	lib/%.o: CFLAGS := -fPIC -g
+
+	if we have two matching pattern specific variables, then we have a situation where longer stem length will be assigned to variable
+
+30. Any variable marked private will be visible to its local target but will not be inherited by prerequisites of that target.
+
+31. A global variable marked private will be visible in the global scope but will not be inherited by any target and hence will be visible in any recipe.
+	EXTRA_CFLAGS =
+
+	prog: private EXTRA_CFLAGS = -L/usr/local/lib
+	prog: a.o b.o
+Due to the private modifier, a.o and b.o will not inherit the EXTRA_CFLAG variable assignment from the prog target.
+
+
+32. Special Variables :
+	1. MAKEFILE_LIST : list of all makefiles read through [most recent is the last one]
+	2. .DEFAULT_GOAL : sets the goal of this make file, or can provide the value of default goal, or can restart default goal selection  algo.
+
+	3. .RECIPEPREFIX : value of this variable defines the character which make assumes to start recipe line.
+
+	4. .VARIABLES : expands to all the list of global variables defined so far.
+	
+	5. .INCLUDE_DIRS : make searches for included makefiles.
